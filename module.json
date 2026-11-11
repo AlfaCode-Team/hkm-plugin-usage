@@ -1,0 +1,54 @@
+{
+    "name": "usage",
+    "version": "0.1.0",
+    "kernel": "^1.20.0",
+    "solves": "usage.metering",
+    "type": "module",
+
+    "requires": [],
+
+    "exposes": [
+        "Plugins\\Usage\\API\\Contracts\\UsageContract"
+    ],
+
+    "routes": [],
+    "emits": [],
+    "listens": [],
+    "files": [],
+
+    "jobs": [
+        { "name": "usage.flush", "handler": "Plugins\\Usage\\Application\\Jobs\\FlushUsageJob", "queue": "usage", "retry": { "max": 5, "strategy": "exponential", "base": 5, "jitter": true }, "timeout": 30 }
+    ],
+
+    "commands": [
+        "Plugins\\Usage\\Infrastructure\\Cli\\UsageRollupCommand",
+        "Plugins\\Usage\\Infrastructure\\Cli\\UsageShowCommand"
+    ],
+
+    "schedule": [
+        {
+            "name": "usage.rollup",
+            "at": "7 * * * *",
+            "command": "usage:rollup --quiet-when-idle",
+            "withoutOverlapping": true,
+            "expiresAfter": 1800
+        }
+    ],
+
+    "documentation": "Per-request counters and gauges, flushed to the queue at after.execute and applied to hourly buckets by a worker, then rolled up into daily ones. The request path never performs the durable write: it adds to an in-memory accumulator and, once the response exists, pushes ONE queue message. Appwrite runs its metering queue at 8 coroutines precisely because it fires on every request; a synchronous write here would tax every response.",
+
+    "//enabling-it-for-every-request": "The after.execute hook is registered globally by boot(), so request counts (http.requests, http.errors, http.bytes_out) are recorded for every route whether or not this module is in the route's dependency graph. A route that wants to call UsageContract (count/gauge from a service) declares \"requires\": [\"usage.metering\"]. Reads (sum, growth, latest) need a DatabasePort in the graph or on the core container.",
+
+    "//needs-a-queue-and-a-worker": "With no QueuePort bound the stage drops the batch — it does NOT fall back to writing inline, because that fallback is the cost this design exists to avoid. `usage:show` prints the line either way; a stopped worker shows as every metric going flat, not as an error.",
+
+    "//tenant-is-attribution": "The tenant id on a measurement comes from Identity::tenantId, which is a hint. It decides which row a count lands on and authorises nothing.",
+
+    "config": [
+        { "key": "USAGE_QUEUE", "type": "string", "required": false, "default": "usage" },
+        { "key": "USAGE_TRACK_REQUESTS", "type": "bool", "required": false, "default": true },
+        { "key": "USAGE_MAX_METRICS", "type": "int", "required": false, "default": 64 },
+        { "key": "USAGE_HOURLY_RETENTION_DAYS", "type": "int", "required": false, "default": 14 },
+        { "key": "USAGE_DAILY_RETENTION_DAYS", "type": "int", "required": false, "default": 400 },
+        { "key": "USAGE_BATCH_RETENTION_HOURS", "type": "int", "required": false, "default": 48 }
+    ]
+}

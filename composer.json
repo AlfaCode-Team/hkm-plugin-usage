@@ -1,0 +1,57 @@
+{
+    "name": "alfacode-team/hkm-plugin-usage",
+    "description": "HKM Kernel plugin providing 'usage.metering' \u2014 per-request counters and gauges, flushed to the queue at after.execute and rolled up into hourly and daily buckets.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "hkm-kernel",
+        "plugin",
+        "php",
+        "metering",
+        "counters",
+        "gauges",
+        "rollup",
+        "observability",
+        "usage.metering"
+    ],
+    "require": {
+        "php": ">=8.4",
+        "alfacode-team/php-service-platform": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11 || ^12 || ^13"
+    },
+    "autoload": {
+        "psr-4": {
+            "Plugins\\Usage\\": ""
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/AlfaCode-Team/hkm-kernel"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/AlfaCode-Team/http"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/AlfaCode-Team/php-io-cli"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/AlfaCode-Team/Let-Migrate"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/hakrichTech/bindIt"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/hakrichTech/type-alias"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
